@@ -1,34 +1,107 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Introduction 
+[GitHub] this shows how to use aws cognito for authentication and authorization. 
+- cognito user pool for authentication
+- cognito identity pool for authorization
+- get credentials and create s3 client 
 
-## Getting Started
 
-First, run the development server:
+## Setup NextJS and AWS SDK 
+create a new nextjs project 
 
-```bash
-npm run dev
-# or
-yarn dev
+```bash 
+npx create-next-app@latest --typescript
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+install dependencies 
+```bash
+npm i @chakra-ui/react @emotion/react @emotion/styled framer-motion react-icons @chakra-ui/icons
+```
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+install aws sdk clients (v3)
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+```bash
+npm i @aws-sdk/client-cognito-identity-provider,
+npm i @aws-sdk/client-s3,
+npm i @aws-sdk/credential-providers,
+npm i @aws-sdk/s3-request-presigner,
+```
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## Cognito 
 
-## Learn More
+sign in (an user already setup and confirmed)
+```tsx
+const cognitoClient = new CognitoIdentityProviderClient({
+  region: config.REGION
+})
 
-To learn more about Next.js, take a look at the following resources:
+export const signIn = async (username: string, password: string) => {
+  try {
+    const response = await cognitoClient.send(
+      new InitiateAuthCommand(
+        {
+          AuthFlow: "USER_PASSWORD_AUTH",
+          AuthParameters: {
+            "USERNAME": username,
+            "PASSWORD": password
+          },
+          ClientId: config.CLIENT_ID
+        }
+      )
+    )
+    console.log('cognito auth: ', response)
+    return response
+  } catch (error) {
+    console.log(error)
+    return null
+  }
+}
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+TODO: sign up (Amplify is faster here)
 
-## Deploy on Vercel
+TODO: confirmation (Amplify is faster here)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## S3 Client 
+credentials and s3 client 
+```tsx
+ const s3Client = new S3Client({
+   region: config.REGION,
+   credentials: fromCognitoIdentityPool({
+     clientConfig: { region: config.REGION },
+     identityPoolId: config.IDENTITY_POOL_ID,
+     logins: {
+       [config.COGNITO_POOL_ID]: idToken
+     }
+   })
+ })
+```
+
+list objects 
+```bash 
+const command = new ListObjectsCommand({
+  Bucket: config.BUCKET,
+  Prefix: "public/",
+})
+
+try {
+  const result = await s3Client.send(command)
+  console.log('s3 list: ', result)
+  return result['Contents']
+} catch (error) {
+  console.log(error)
+  return []
+}
+```
+
+set signed url object 
+```bash 
+const command = new GetObjectCommand({
+  Bucket: config.BUCKET,
+  Key: key
+})
+const signUrl = await getSignedUrl(s3Client, command)
+```
+
+
