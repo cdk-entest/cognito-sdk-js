@@ -101,7 +101,6 @@ export const SignUpForm = ({ setUser }: { setUser: any }) => {
 
   const ConfirmButton = (
     <Box
-      width="5xl"
       height="70vh"
       display="flex"
       alignItems="center"
