@@ -1,5 +1,5 @@
 ## Introduction 
-[GitHub] this shows how to use aws cognito for authentication and authorization. 
+[GitHub](https://github.com/entest-hai/cognito-sdk-js) this shows how to use aws cognito for authentication and authorization. 
 - cognito user pool for authentication
 - cognito identity pool for authorization
 - get credentials and create s3 client 
