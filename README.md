@@ -21,6 +21,83 @@ date: 2022-09-14
   src="/thumbnail/cognito-sdk-js.png"
 />
 
+## Setup Backend 
+setup CORS rule for a bucket 
+```tsx
+const bucket = new aws_s3.Bucket(this, 'CognitoDemoBucket', {
+  bucketName: `cognito-demo-bucket-${this.account}-1`,
+  removalPolicy: RemovalPolicy.DESTROY,
+  // so webapp runnning local host can access s3
+  cors: [
+    {
+      allowedHeaders: ['*'],
+      allowedMethods: [
+        aws_s3.HttpMethods.GET,
+        aws_s3.HttpMethods.PUT,
+        aws_s3.HttpMethods.DELETE,
+        aws_s3.HttpMethods.POST
+      ],
+      allowedOrigins: ['*'],
+      exposedHeaders: [
+        'x-amz-server-side-encryption',
+        'x-amz-request-id',
+        'x-amz-id-2',
+        'ETag'
+      ],
+      maxAge: 3000
+    }
+  ]
+})
+```
+
+user pool 
+
+```tsx
+const userPool = new aws_cognito.UserPool(this, 'UserPoolDemo', {
+  userPoolName: 'UserPoolDemo',
+  selfSignUpEnabled: true,
+  signInAliases: {
+    email: true
+  },
+  autoVerify: {
+    email: true
+  },
+  removalPolicy: RemovalPolicy.DESTROY
+})
+
+const client = userPool.addClient('NextJsWebAppClient', {
+  authFlows: {
+    userPassword: true,
+    adminUserPassword: true,
+    custom: true,
+    userSrp: true
+  },
+  userPoolClientName: 'WebAppClient'
+})
+```
+
+associate userpool with an identity pool 
+```tsx
+const identityPool = new IdentityPool(this, 'IdentityPoolDemo', {
+  identityPoolName: 'IdentityPoolDemo',
+  authenticationProviders: {
+    userPools: [
+      new UserPoolAuthenticationProvider({
+        userPool,
+        userPoolClient: client
+      })
+    ]
+  }
+})
+```
+
+grant read write s3 permission to the identity pool 
+
+```tsx
+ bucket.grantReadWrite(identityPool.authenticatedRole)
+ bucket.grantRead(identityPool.authenticatedRole)
+```
+
 ## Setup NextJS and AWS SDK
 
 create a new nextjs project
@@ -38,10 +115,7 @@ npm i @chakra-ui/react @emotion/react @emotion/styled framer-motion react-icons 
 install aws sdk clients (v3)
 
 ```bash
-npm i @aws-sdk/client-cognito-identity-provider,
-npm i @aws-sdk/client-s3,
-npm i @aws-sdk/credential-providers,
-npm i @aws-sdk/s3-request-presigner,
+npm i @aws-sdk/client-cognito-identity-provider @aws-sdk/client-s3 @aws-sdk/credential-providers @aws-sdk/s3-request-presigner
 ```
 
 ## Cognito
