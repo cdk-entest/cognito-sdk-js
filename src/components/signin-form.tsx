@@ -11,15 +11,12 @@ import { EmailIcon, ViewIcon } from "@chakra-ui/icons";
 import React, { useState } from "react";
 import { signIn } from "../services/cognito";
 
-
-const SigninForm = ({ setUser }: { setUser: any }) => {
+const SignInForm = ({ setUser }: { setUser: any }) => {
   const [name, setName] = useState("");
   const [pass, setPass] = useState("");
 
-
   return (
     <Box
-      width="5xl"
       height="70vh"
       display="flex"
       alignItems="center"
@@ -60,7 +57,7 @@ const SigninForm = ({ setUser }: { setUser: any }) => {
           colorScheme="teal"
           onClick={async () => {
             const user = await signIn(name, pass);
-            setUser(user)
+            setUser(user);
           }}
         >
           Sign In
@@ -79,5 +76,4 @@ const SigninForm = ({ setUser }: { setUser: any }) => {
   );
 };
 
-export default SigninForm;
-
+export default SignInForm;

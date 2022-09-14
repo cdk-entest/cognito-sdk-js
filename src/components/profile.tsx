@@ -1,14 +1,13 @@
-import { Image, Box, Text, Flex, Button } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
-import { listObjects, getS3Object } from "../services/cognito"
-
+import { Image, Box, Text, Flex, Button } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { listObjects, getS3Object } from "../services/storage";
 
 const ListImages = ({
   user,
   images,
   setImageUrl,
 }: {
-  user: any,
+  user: any;
   images: string[];
   setImageUrl: any;
 }) => {
@@ -33,7 +32,10 @@ const ListImages = ({
           <Button
             colorScheme={"teal"}
             onClick={async () => {
-              const url = await getS3Object(user['AuthenticationResult']['IdToken'], image);
+              const url = await getS3Object(
+                user["AuthenticationResult"]["IdToken"],
+                image
+              );
               setImageUrl(url);
             }}
           >
@@ -44,7 +46,6 @@ const ListImages = ({
     </Flex>
   );
 };
-
 
 const ViewImage = ({ imageUrl }: { imageUrl: string }) => {
   return (
@@ -63,34 +64,41 @@ const ViewImage = ({ imageUrl }: { imageUrl: string }) => {
   );
 };
 
-
-export const Profile = ({ user }: { user: any }) => {
-
-  const [images, setImages] = useState<string[]>([])
-  const [imageUrl, setImageUrl] = useState<string>()
+export const Profile = ({ user, setUser }: { user: any, setUser: any }) => {
+  const [images, setImages] = useState<string[]>([]);
+  const [imageUrl, setImageUrl] = useState<string>();
 
   const getImages = async () => {
-    const items = await listObjects(user["AuthenticationResult"]['IdToken'])
+    const items = await listObjects(user["AuthenticationResult"]["IdToken"]);
 
     if (items) {
-      const keys = items.map(item => item["Key"]!)
-      setImages(keys)
+      const keys = items.map((item) => item["Key"]!);
+      setImages(keys);
     }
-  }
+  };
 
   useEffect(() => {
-    getImages()
-  }, [])
+    getImages();
+  }, []);
 
   return (
     <Flex
-      margin={'auto'}
+      margin={"auto"}
       maxW={"1000px"}
-      direction={'column'}
-      alignItems={'center'}
+      direction={"column"}
+      alignItems={"center"}
     >
+      <Button colorScheme={'green'}
+        onClick={() => {
+          setUser(null)
+        }}
+      >Sign Out</Button>
       <ViewImage imageUrl={imageUrl!}></ViewImage>
-      <ListImages user={user} images={images} setImageUrl={setImageUrl}></ListImages>
+      <ListImages
+        user={user}
+        images={images}
+        setImageUrl={setImageUrl}
+      ></ListImages>
     </Flex>
-  )
-}
+  );
+};

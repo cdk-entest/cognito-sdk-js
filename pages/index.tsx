@@ -1,18 +1,27 @@
 import type { NextPage } from 'next'
-import LoginForm from '../src/components/signin-form'
+import SignInForm from '../src/components/signin-form'
 import { Profile } from '../src/components/profile'
 import { useState } from 'react'
+import { SignUpForm } from '../src/components/signup-form'
 
 const Home: NextPage = () => {
 
   const [auth, setAuth] = useState<any>(null)
 
-  if (auth) {
-    return <Profile user={auth}></Profile>
+  if (auth === 'SIGNUP') {
+    return (
+      <SignUpForm setUser={setAuth}></SignUpForm>
+    )
   }
 
+
+  if (auth) {
+    return <Profile user={auth} setUser={setAuth}></Profile>
+  }
+
+
   return (
-    <LoginForm setUser={setAuth}></LoginForm>
+    <SignInForm setUser={setAuth}></SignInForm>
   )
 }
 
