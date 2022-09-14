@@ -1,3 +1,11 @@
+---
+title: Cognito SDK JavaScript 
+description: cognito sdk js for authentication and authorization 
+author: haimtran
+publishedDate: 14/09/2022
+date: 2022-09-14
+---
+
 ## Introduction 
 [GitHub](https://github.com/entest-hai/cognito-sdk-js) this shows how to use aws cognito for authentication and authorization. 
 - cognito user pool for authentication
@@ -27,6 +35,44 @@ npm i @aws-sdk/s3-request-presigner,
 ```
 
 ## Cognito 
+sign up a new account 
+```tsx
+export const signUp = async (username: string, password: string) => {
+  try {
+    const response = await cognitoClient.send(
+      new SignUpCommand(
+        {
+          ClientId: config.CLIENT_ID,
+          Username: username,
+          Password: password
+        }
+      )
+    )
+    console.log(response)
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+```
+
+then confirm sign up. The issue is how to redirect after success confirmed
+```tsx
+export const confirm = async (username: string, code: string) => {
+  try {
+    const response = await cognitoClient.send(
+      new ConfirmSignUpCommand({
+        ClientId: config.CLIENT_ID,
+        ConfirmationCode: code,
+        Username: username
+      })
+    )
+    console.log(response)
+  } catch (error) {
+    console.log(error)
+  }
+}
+```
 
 sign in (an user already setup and confirmed)
 ```tsx
@@ -55,13 +101,10 @@ export const signIn = async (username: string, password: string) => {
     return null
   }
 }
-
 ```
 
-TODO: sign up (Amplify is faster here)
 
-TODO: confirmation (Amplify is faster here)
-
+TODO: redirect after confirm success so users do not need to sign in after confirm success
 
 ## S3 Client 
 credentials and s3 client 
