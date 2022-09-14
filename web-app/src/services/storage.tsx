@@ -1,6 +1,9 @@
-
 import { config } from './../../config'
-import { S3Client, ListObjectsCommand, GetObjectCommand } from '@aws-sdk/client-s3'
+import {
+  S3Client,
+  ListObjectsCommand,
+  GetObjectCommand
+} from '@aws-sdk/client-s3'
 import { fromCognitoIdentityPool } from '@aws-sdk/credential-providers'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
@@ -18,7 +21,7 @@ export const listObjects = async (idToken: string) => {
 
   const command = new ListObjectsCommand({
     Bucket: config.BUCKET,
-    Prefix: "public/",
+    Prefix: 'public/'
   })
 
   try {
@@ -31,9 +34,7 @@ export const listObjects = async (idToken: string) => {
   }
 }
 
-
 export const getS3Object = async (idToken: string, key: string) => {
-
   const s3Client = new S3Client({
     region: config.REGION,
     credentials: fromCognitoIdentityPool({
@@ -52,5 +53,5 @@ export const getS3Object = async (idToken: string, key: string) => {
 
   const signUrl = await getSignedUrl(s3Client, command)
 
-  return signUrl;
-};
+  return signUrl
+}
